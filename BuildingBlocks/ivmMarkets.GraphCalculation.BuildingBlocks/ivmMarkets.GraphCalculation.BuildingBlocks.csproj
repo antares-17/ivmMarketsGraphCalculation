@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="StackExchange.Redis" Version="2.2.62" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\EventBus\EventBusRabbitMQ\ivmMarkets.GraphCalculation.EventBusRabbitMQ.csproj" />
+    <ProjectReference Include="..\EventBus\EventBus\ivmMarkets.GraphCalculation.EventBus.csproj" />
+  </ItemGroup>
+
+</Project>
