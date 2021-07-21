@@ -1,0 +1,229 @@
+version: '3.4'
+
+services:  
+  parametersdata:
+    ports:
+      - "6479:6479"
+    volumes:
+      - graph-calculation-parametersdata:/data
+
+  fabdata:
+    ports:
+      - "6481:6481"
+    volumes:
+      - graph-calculation-fabdata:/data
+
+  fcddata:
+    ports:
+      - "6482:6482"
+    volumes:
+      - graph-calculation-fcddata:/data
+
+  fedata:
+    ports:
+      - "6483:6483"
+    volumes:
+      - graph-calculation-fedata:/data
+
+  fxdata:
+    ports:
+      - "6484:6484"
+    volumes:
+      - graph-calculation-fxdata:/data
+
+  fydata:
+    ports:
+      - "6485:6485"
+    volumes:
+      - graph-calculation-fydata:/data
+
+  resultdata:
+    ports:
+      - "6480:6480"
+    volumes:
+      - graph-calculation-resultdata:/data
+
+  rabbitmq:
+    ports:
+      - "15772:15772"
+      - "5772:5772"
+
+  input-parameters-api:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://0.0.0.0:80
+      - ConnectionString=${GRAPH_CALCULATION_REDIS_PARAMETERS_DB:-parametersdata}
+      - EventBusConnection=${GRAPH_CALCULATION_SERVICE_BUS:-rabbitmq}
+      - EventBusUserName=${GRAPH_CALCULATION_SERVICE_BUS_USERNAME}
+      - EventBusPassword=${GRAPH_CALCULATION_SERVICE_BUS_PASSWORD}
+      - ApplicationInsights__InstrumentationKey=${INSTRUMENTATION_KEY}
+      - OrchestratorType=${ORCHESTRATOR_TYPE}
+      - UseLoadTest=${USE_LOADTEST:-False}
+      - PATH_BASE=/input-parameters-api
+      - GRPC_PORT=81
+      - PORT=80
+    ports:
+      - "5342:80"
+      - "9242:81"
+
+  fab-api:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://0.0.0.0:80
+      - ConnectionString=${GRAPH_CALCULATION_REDIS_REUSULT_DB:-fabdata}
+      - EventBusConnection=${GRAPH_CALCULATION_SERVICE_BUS:-rabbitmq}
+      - EventBusUserName=${GRAPH_CALCULATION_SERVICE_BUS_USERNAME}
+      - EventBusPassword=${GRAPH_CALCULATION_SERVICE_BUS_PASSWORD}
+      - ParametersUrl=http://input-parameters-api
+      - ApplicationInsights__InstrumentationKey=${INSTRUMENTATION_KEY}
+      - OrchestratorType=${ORCHESTRATOR_TYPE}
+      - UseLoadTest=${USE_LOADTEST:-False}
+      - PATH_BASE=/fab-api
+      - GRPC_PORT=81
+      - PORT=80
+    ports:
+      - "5343:80"
+      - "9243:81"  
+
+  fy-api:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://0.0.0.0:80
+      - ConnectionString=${GRAPH_CALCULATION_REDIS_REUSULT_DB:-fydata}
+      - EventBusConnection=${GRAPH_CALCULATION_SERVICE_BUS:-rabbitmq}
+      - EventBusUserName=${GRAPH_CALCULATION_SERVICE_BUS_USERNAME}
+      - EventBusPassword=${GRAPH_CALCULATION_SERVICE_BUS_PASSWORD}
+      - ParametersUrl=http://input-parameters-api
+      - ApplicationInsights__InstrumentationKey=${INSTRUMENTATION_KEY}
+      - OrchestratorType=${ORCHESTRATOR_TYPE}
+      - UseLoadTest=${USE_LOADTEST:-False}
+      - PATH_BASE=/fy-api
+      - GRPC_PORT=81
+      - PORT=80
+    ports:
+      - "5345:80"
+      - "9245:81"
+    
+  fx-api:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://0.0.0.0:80
+      - ConnectionString=${GRAPH_CALCULATION_REDIS_REUSULT_DB:-fxdata}
+      - EventBusConnection=${GRAPH_CALCULATION_SERVICE_BUS:-rabbitmq}
+      - EventBusUserName=${GRAPH_CALCULATION_SERVICE_BUS_USERNAME}
+      - EventBusPassword=${GRAPH_CALCULATION_SERVICE_BUS_PASSWORD}
+      - ParametersUrl=http://input-parameters-api
+      - ApplicationInsights__InstrumentationKey=${INSTRUMENTATION_KEY}
+      - OrchestratorType=${ORCHESTRATOR_TYPE}
+      - UseLoadTest=${USE_LOADTEST:-False}
+      - PATH_BASE=/fx-api
+      - GRPC_PORT=81
+      - PORT=80
+    ports:
+      - "5346:80"
+      - "9246:81" 
+
+  fcd-api:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://0.0.0.0:80
+      - ConnectionString=${GRAPH_CALCULATION_REDIS_REUSULT_DB:-fcddata}
+      - EventBusConnection=${GRAPH_CALCULATION_SERVICE_BUS:-rabbitmq}
+      - EventBusUserName=${GRAPH_CALCULATION_SERVICE_BUS_USERNAME}
+      - EventBusPassword=${GRAPH_CALCULATION_SERVICE_BUS_PASSWORD}
+      - ParametersUrl=http://input-parameters-api
+      - FabUrl=http://fab-api
+      - FyUrl=http://fy-api
+      - ApplicationInsights__InstrumentationKey=${INSTRUMENTATION_KEY}
+      - OrchestratorType=${ORCHESTRATOR_TYPE}
+      - UseLoadTest=${USE_LOADTEST:-False}
+      - PATH_BASE=/fcd-api
+      - GRPC_PORT=81
+      - PORT=80
+    ports:
+      - "5347:80"
+      - "9247:81"
+
+  fe-api:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://0.0.0.0:80
+      - ConnectionString=${GRAPH_CALCULATION_REDIS_REUSULT_DB:-fedata}
+      - EventBusConnection=${GRAPH_CALCULATION_SERVICE_BUS:-rabbitmq}
+      - EventBusUserName=${GRAPH_CALCULATION_SERVICE_BUS_USERNAME}
+      - EventBusPassword=${GRAPH_CALCULATION_SERVICE_BUS_PASSWORD}
+      - ParametersUrl=http://input-parameters-api
+      - FcdUrl=http://fcd-api
+      - FxUrl=http://fx-api
+      - ApplicationInsights__InstrumentationKey=${INSTRUMENTATION_KEY}
+      - OrchestratorType=${ORCHESTRATOR_TYPE}
+      - UseLoadTest=${USE_LOADTEST:-False}
+      - PATH_BASE=/fe-api
+      - GRPC_PORT=81
+      - PORT=80
+    ports:
+      - "5348:80"
+      - "9248:81"
+
+  result-api:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://0.0.0.0:80
+      - ConnectionString=${GRAPH_CALCULATION_REDIS_REUSULT_DB:-resultdata}
+      - EventBusConnection=${GRAPH_CALCULATION_SERVICE_BUS:-rabbitmq}
+      - EventBusUserName=${GRAPH_CALCULATION_SERVICE_BUS_USERNAME}
+      - EventBusPassword=${GRAPH_CALCULATION_SERVICE_BUS_PASSWORD}
+      - FeUrl=http://fe-api
+      - ApplicationInsights__InstrumentationKey=${INSTRUMENTATION_KEY}
+      - OrchestratorType=${ORCHESTRATOR_TYPE}
+      - UseLoadTest=${USE_LOADTEST:-False}
+      - PATH_BASE=/result-api
+      - GRPC_PORT=81
+      - PORT=80
+    ports:
+      - "5341:80"
+      - "9241:81"  
+
+  uimvc:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://0.0.0.0:80
+      - ParametersUrl=http://input-parameters-api
+      - FabUrl=http://fab-api
+      - FcdUrl=http://fcd-api
+      - FeUrl=http://fe-api
+      - FxUrl=http://fx-api
+      - FyUrl=http://fy-api
+      - ResultUrl=http://result-api
+      - UseCustomizationData=True
+      - ApplicationInsights__InstrumentationKey=${INSTRUMENTATION_KEY}
+      - OrchestratorType=${ORCHESTRATOR_TYPE}
+      - UseLoadTest=${USE_LOADTEST:-False}
+    ports:
+      - "5600:80"
+
+volumes:
+  graph-calculation-parametersdata:
+    external: false
+
+  graph-calculation-fabdata:
+    external: false
+
+  graph-calculation-fcddata:
+    external: false
+
+  graph-calculation-fedata:
+    external: false
+
+  graph-calculation-fxdata:
+    external: false
+
+  graph-calculation-fydata:
+    external: false
+
+  graph-calculation-resultdata:
+    external: false
+
+
+
+

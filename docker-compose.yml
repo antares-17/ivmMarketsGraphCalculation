@@ -1,0 +1,113 @@
+version: '3.4'
+
+services:
+  parametersdata:
+    image: redis:alpine
+
+  fabdata:
+    image: redis:alpine
+  
+  fcddata:
+    image: redis:alpine
+    
+  fedata:
+    image: redis:alpine
+    
+  fxdata:
+    image: redis:alpine
+    
+  fydata:
+    image: redis:alpine
+
+  resultdata:
+    image: redis:alpine
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+
+  input-parameters-api:
+    image: ${REGISTRY:-graph_calculation}/input-parameters.api:${PLATFORM:-linux}-${TAG:-latest}
+    build:
+      context: .
+      dockerfile: Services/ivmMarkets.GraphCalculation.InputParameters.API/Dockerfile
+    depends_on:
+      - parametersdata
+      - rabbitmq
+
+  fab-api:
+    image: ${REGISTRY:-graph_calculation}/fab.api:${PLATFORM:-linux}-${TAG:-latest}
+    build:
+      context: .
+      dockerfile: Services/ivmMarkets.GraphCalculation.Fab.API/Dockerfile
+    depends_on:
+      - fabdata
+      - rabbitmq
+      - input-parameters-api 
+      
+  fy-api:
+    image: ${REGISTRY:-graph_calculation}/fy.api:${PLATFORM:-linux}-${TAG:-latest}
+    build:
+      context: .
+      dockerfile: Services/ivmMarkets.GraphCalculation.Fy.API/Dockerfile
+    depends_on:
+      - fydata
+      - rabbitmq
+      - input-parameters-api 
+
+  fx-api:
+    image: ${REGISTRY:-graph_calculation}/fx.api:${PLATFORM:-linux}-${TAG:-latest}
+    build:
+      context: .
+      dockerfile: Services/ivmMarkets.GraphCalculation.Fx.API/Dockerfile
+    depends_on:
+      - fxdata
+      - rabbitmq
+      - input-parameters-api 
+
+  fcd-api:
+    image: ${REGISTRY:-graph_calculation}/fcd.api:${PLATFORM:-linux}-${TAG:-latest}
+    build:
+      context: .
+      dockerfile: Services/ivmMarkets.GraphCalculation.Fcd.API/Dockerfile
+    depends_on:
+      - fcddata
+      - rabbitmq
+      - input-parameters-api 
+      - fab-api 
+      - fy-api 
+
+  fe-api:
+    image: ${REGISTRY:-graph_calculation}/fe.api:${PLATFORM:-linux}-${TAG:-latest}
+    build:
+      context: .
+      dockerfile: Services/ivmMarkets.GraphCalculation.Fe.API/Dockerfile
+    depends_on:
+      - fedata
+      - rabbitmq
+      - input-parameters-api 
+      - fcd-api 
+      - fx-api 
+
+  result-api:
+    image: ${REGISTRY:-graph_calculation}/result.api:${PLATFORM:-linux}-${TAG:-latest}
+    build:
+      context: .
+      dockerfile: Services/ivmMarkets.GraphCalculation.Result.API/Dockerfile
+    depends_on:
+      - resultdata
+      - rabbitmq
+      - fe-api  
+
+  uimvc:
+    image: ${REGISTRY:-graph_calculation}/uimvc:${PLATFORM:-linux}-${TAG:-latest}
+    build:
+      context: .
+      dockerfile: Web/ivmMarkets.GraphCalculation.MVC/Dockerfile
+    depends_on:      
+      - input-parameters-api
+      - fab-api
+      - fcd-api
+      - fe-api
+      - fx-api
+      - fy-api
+      - result-api

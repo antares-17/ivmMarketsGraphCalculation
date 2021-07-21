@@ -1,0 +1,131 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<script>
+    $(document).ready(function () {
+        setTimeout(checkCalculation, 0);
+
+        $(".parameterInput").change(setParameter);
+    });
+
+    function setParameter(eventObject) {
+        if (!isNaN(+eventObject.target.value)) {
+            $.ajax({
+                url: "@Url.Action("SetParameterValue")",
+                type: "POST",
+                dataType: "json",
+                data: { parameterName: eventObject.target.id, parameterValue: eventObject.target.value },
+                success: function (data) {
+                    if (data !== "") {
+                        $("#div" + eventObject.target.id + "Time")[0].innerText = new Date(data).toLocaleString();
+                    }
+                }
+            });
+        }
+        else {
+            alert("You should enter a numeric value.");
+            setTimeout(eventObject.target.focus, 0);
+        }
+    }
+
+    function checkCalculation() {
+        $.ajax({
+            url: "@Url.Action("GetCalculationResults")",
+            type: "POST",
+            dataType: "json",
+            data: {},
+            success: function (data) {
+                if (data !== "") {
+                    for(prop in data)
+                    {
+                        setCalculationResult(prop, data[prop]);
+                    }
+                }
+                setTimeout(checkCalculation, 2000);
+            }
+        });
+    }
+
+    function setCalculationResult(calculationNodeName, calculationResult)
+    {
+        $("#div" + calculationNodeName + "Value")[0].innerText = calculationResult == null ? "<Not calculated>" : calculationResult.value;
+        $("#div" + calculationNodeName + "Time")[0].innerText = calculationResult == null ? "" : new Date(calculationResult.calculationTime).toLocaleString();
+    }
+</script>
+
+<div class="text-left">
+    <div>
+        <img src="~/img/graph.jpg" style="width:660px;height:300px" />
+    </div>
+    <table class="text-left" cellpadding="4" cellspacing="4" border="1" width="660px">
+        <tr>
+            <td colspan="3">Parameters</td>
+            <td colspan="3">Calculation</td>
+        </tr>
+        <tr>
+            <td>Name</td>
+            <td>Value</td>
+            <td>Change time</td>
+            <td>Name</td>
+            <td>Value</td>
+            <td>Change time</td>
+        </tr>
+        <tr>
+            <td>а</td>
+            <td><input type="text" class="parameterInput" id="a" /></td>
+            <td><div id="divaTime"></div></td>
+            <td>Fab</td>
+            <td><div id="divFabValue"></div></td>
+            <td><div id="divFabTime"></div></td>
+        </tr>
+        <tr>
+            <td>b</td>
+            <td><input type="text" class="parameterInput" id="b" /></td>
+            <td><div id="divbTime"></div></td>
+            <td>Fcd</td>
+            <td><div id="divFcdValue"></div></td>
+            <td><div id="divFcdTime"></div></td>
+        </tr>
+        <tr>
+            <td>c</td>
+            <td><input type="text" class="parameterInput" id="c" /></td>
+            <td><div id="divcTime"></div></td>
+            <td>Fe</td>
+            <td><div id="divFeValue"></div></td>
+            <td><div id="divFeTime"></div></td>
+        </tr>
+        <tr>
+            <td>d</td>
+            <td><input type="text" class="parameterInput" id="d" /></td>
+            <td><div id="divdTime"></div></td>
+            <td>Fx</td>
+            <td><div id="divFxValue"></div></td>
+            <td><div id="divFxTime"></div></td>
+        </tr>
+        <tr>
+            <td>e</td>
+            <td><input type="text" class="parameterInput" id="e" /></td>
+            <td><div id="diveTime"></div></td>
+            <td>Fy</td>
+            <td><div id="divFyValue"></div></td>
+            <td><div id="divFyTime"></div></td>
+        </tr>
+        <tr>
+            <td>x</td>
+            <td><input type="text" class="parameterInput" id="x" /></td>
+            <td><div id="divxTime"></div></td>
+            <td></td>
+            <td></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>y</td>
+            <td><input type="text" class="parameterInput" id="y" /></td>
+            <td><div id="divyTime"></div></td>
+            <td>Result</td>
+            <td><div id="divResultValue"></div></td>
+            <td><div id="divResultTime"></div></td>
+        </tr>
+    </table>
+</div>
